@@ -24,6 +24,12 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const filters = b.option(
+        []const []const u8,
+        "test-filter",
+        "Skip tests that do not match any filter",
+    ) orelse &.{};
+
     const steps = Steps{
         .check = b.step("check", "Compile every artifact without running it"),
         .ci = b.step("ci", "Run formatting, compilation, unit tests, and fuzzer smoke"),
@@ -44,7 +50,7 @@ pub fn build(b: *std.Build) void {
 
     add_format(b, &steps);
     add_cli(b, &steps, module, target, optimize);
-    add_unit_tests(b, &steps, target, optimize);
+    add_unit_tests(b, &steps, target, optimize, filters);
     add_fuzz(b, &steps, target, optimize);
 
     steps.ci.dependOn(steps.test_fmt);
@@ -57,7 +63,7 @@ pub fn build(b: *std.Build) void {
 
 fn add_format(b: *std.Build, steps: *const Steps) void {
     const fmt = b.addFmt(.{
-        .paths = &format_paths,
+        .paths = b.pathList(&format_paths),
         .check = true,
     });
 
@@ -70,7 +76,7 @@ fn add_cli(
     steps: *const Steps,
     module: *std.Build.Module,
     target: std.Build.ResolvedTarget,
-    optimize: std.builtin.OptimizeMode,
+    optimize: std.lang.Optimize,
 ) void {
     const exe = b.addExecutable(.{
         .name = "zgarmin",
@@ -87,8 +93,7 @@ fn add_cli(
     const run = b.addRunArtifact(exe);
 
     run.step.dependOn(b.getInstallStep());
-
-    if (b.args) |args| run.addArgs(args);
+    run.addPassthruArgs();
 
     steps.run.dependOn(&run.step);
     steps.check.dependOn(&exe.step);
@@ -98,7 +103,8 @@ fn add_unit_tests(
     b: *std.Build,
     steps: *const Steps,
     target: std.Build.ResolvedTarget,
-    optimize: std.builtin.OptimizeMode,
+    optimize: std.lang.Optimize,
+    filters: []const []const u8,
 ) void {
     const unit = b.addTest(.{
         .root_module = b.createModule(.{
@@ -106,7 +112,7 @@ fn add_unit_tests(
             .target = target,
             .optimize = optimize,
         }),
-        .filters = b.args orelse &.{},
+        .filters = filters,
     });
 
     const run = b.addRunArtifact(unit);
@@ -120,7 +126,7 @@ fn add_fuzz(
     b: *std.Build,
     steps: *const Steps,
     target: std.Build.ResolvedTarget,
-    optimize: std.builtin.OptimizeMode,
+    optimize: std.lang.Optimize,
 ) void {
     const exe = b.addExecutable(.{
         .name = "fuzz",
@@ -133,7 +139,7 @@ fn add_fuzz(
 
     const run = b.addRunArtifact(exe);
 
-    if (b.args) |args| run.addArgs(args);
+    run.addPassthruArgs();
 
     const smoke = b.addRunArtifact(exe);
 

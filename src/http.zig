@@ -241,7 +241,7 @@ pub const Client = struct {
             }
         }
 
-        const status = @intFromEnum(response.head.status);
+        const status = @backingInt(response.head.status);
 
         client.last_status = status;
 
@@ -314,10 +314,10 @@ pub const CookieJar = struct {
     }
 
     pub fn store_set_cookie(jar: *CookieJar, raw: []const u8) Error!void {
-        const end = std.mem.indexOfScalar(u8, raw, ';') orelse raw.len;
+        const end = std.mem.findScalar(u8, raw, ';') orelse raw.len;
         const pair = std.mem.trim(u8, raw[0..end], " ");
 
-        const equals = std.mem.indexOfScalar(u8, pair, '=') orelse return;
+        const equals = std.mem.findScalar(u8, pair, '=') orelse return;
         const name = std.mem.trim(u8, pair[0..equals], " ");
         const value = std.mem.trim(u8, pair[equals + 1 ..], " ");
 
@@ -460,7 +460,7 @@ pub fn url_from_location(gpa: Allocator, uri: std.Uri, location: []const u8) Err
     if (std.mem.startsWith(u8, location, "http://")) return gpa.dupe(u8, location);
 
     if (std.mem.startsWith(u8, location, "//")) {
-        return std.fmt.allocPrint(gpa, "{s}:{s}", .{ uri.scheme, location });
+        return gpa.print("{s}:{s}", .{ uri.scheme, location });
     }
 
     if (location[0] == '/') {
@@ -468,7 +468,7 @@ pub fn url_from_location(gpa: Allocator, uri: std.Uri, location: []const u8) Err
 
         assert(host.len != 0);
 
-        return std.fmt.allocPrint(gpa, "{s}://{s}{s}", .{ uri.scheme, host, location });
+        return gpa.print("{s}://{s}{s}", .{ uri.scheme, host, location });
     }
 
     return Error.RedirectLocationUnsupported;
@@ -533,7 +533,7 @@ test "CookieJar.set returns CookieCountExceeded past the cap" {
     var index: u32 = 0;
 
     while (index < cookies_max) : (index += 1) {
-        const name = try std.fmt.bufPrint(&buffer, "cookie{d}", .{index});
+        const name = try std.mem.print(&buffer, "cookie{d}", .{index});
 
         try jar.set(name, "value");
     }

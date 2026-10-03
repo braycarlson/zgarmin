@@ -56,7 +56,7 @@ pub const OAuth2Token = struct {
     pub fn authorization(token: *const OAuth2Token, gpa: Allocator) ![]u8 {
         assert(token.access_token.len != 0);
 
-        return std.fmt.allocPrint(gpa, "{s} {s}", .{ scheme, token.access_token });
+        return gpa.print("{s} {s}", .{ scheme, token.access_token });
     }
 };
 

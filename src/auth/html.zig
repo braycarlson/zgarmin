@@ -24,10 +24,10 @@ pub fn field_present(document: []const u8, name: []const u8) bool {
 }
 
 pub fn service_ticket(document: []const u8) ?[]const u8 {
-    const at = std.mem.indexOf(u8, document, ticket_marker) orelse return null;
+    const at = std.mem.find(u8, document, ticket_marker) orelse return null;
     const body = document[at + ticket_marker.len ..];
 
-    const end = std.mem.indexOfAny(u8, body, ticket_terminators) orelse body.len;
+    const end = std.mem.findAny(u8, body, ticket_terminators) orelse body.len;
 
     if (end == 0) return null;
 
@@ -41,8 +41,8 @@ fn tag_named(document: []const u8, name: []const u8) ?[]const u8 {
     var scanned: u32 = 0;
 
     while (scanned < tags_scanned_max) : (scanned += 1) {
-        const opened = std.mem.indexOfScalarPos(u8, document, cursor, '<') orelse return null;
-        const closed = std.mem.indexOfScalarPos(u8, document, opened, '>') orelse return null;
+        const opened = std.mem.findScalarPos(u8, document, cursor, '<') orelse return null;
+        const closed = std.mem.findScalarPos(u8, document, opened, '>') orelse return null;
 
         assert(closed > opened);
 
@@ -65,7 +65,7 @@ pub fn attribute(tag: []const u8, key: []const u8) ?[]const u8 {
     var scanned: u32 = 0;
 
     while (scanned < attributes_scanned_max) : (scanned += 1) {
-        const at = std.mem.indexOfPos(u8, tag, cursor, key) orelse return null;
+        const at = std.mem.findPos(u8, tag, cursor, key) orelse return null;
         const after = at + key.len;
 
         cursor = after;
@@ -80,7 +80,7 @@ pub fn attribute(tag: []const u8, key: []const u8) ?[]const u8 {
         if (!is_quote(tag[opened])) continue;
 
         const body = tag[opened + 1 ..];
-        const closed = std.mem.indexOfScalar(u8, body, tag[opened]) orelse return null;
+        const closed = std.mem.findScalar(u8, body, tag[opened]) orelse return null;
 
         return body[0..closed];
     }

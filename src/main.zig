@@ -261,7 +261,7 @@ fn persist_if_refreshed(init: std.process.Init, out: *std.Io.Writer, session: *c
 }
 
 fn save_tokens(out: *std.Io.Writer, session: *core.Session, path: []const u8) void {
-    const directory = std.fs.path.dirname(path) orelse ".";
+    const directory = std.Io.Dir.path.dirname(path) orelse ".";
 
     std.Io.Dir.cwd().createDirPath(session.io, directory) catch |err| {
         out.print("warning: token save failed ({s})\n", .{@errorName(err)}) catch return;
@@ -279,7 +279,7 @@ fn tokens_path(init: std.process.Init) ![]u8 {
         init.environ_map.get("HOME") orelse
         return error.HomeDirectoryUnknown;
 
-    return std.fmt.allocPrint(init.arena.allocator(), "{s}/{s}/{s}", .{
+    return init.arena.allocator().print("{s}/{s}/{s}", .{
         home,
         tokens_directory_name,
         tokens_file_name,
@@ -481,13 +481,13 @@ fn download_one(
     id: i64,
 ) !DownloadOutcome {
     var path_buffer: [512]u8 = undefined;
-    const path = try std.fmt.bufPrint(&path_buffer, "{s}/{d}.zip", .{ directory, id });
+    const path = try std.mem.print(&path_buffer, "{s}/{d}.zip", .{ directory, id });
 
     if (file_exists(init.io, path)) return .skipped;
 
     var id_buffer: [32]u8 = undefined;
 
-    const id_text = std.fmt.bufPrint(&id_buffer, "{d}", .{id}) catch |err| switch (err) {
+    const id_text = std.mem.print(&id_buffer, "{d}", .{id}) catch |err| switch (err) {
         error.NoSpaceLeft => @panic("id_buffer too small for an activity id"),
     };
 

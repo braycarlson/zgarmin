@@ -145,7 +145,7 @@ pub const Endpoint = enum {
     pub fn path(comptime endpoint: Endpoint) []const u8 {
         const result = comptime endpoint.template();
 
-        comptime if (std.mem.indexOfScalar(u8, result, '{') != null) @compileError(
+        comptime if (std.mem.findScalar(u8, result, '{') != null) @compileError(
             "templated endpoint '" ++ @tagName(endpoint) ++ "' requires arguments; call build()",
         );
 
@@ -165,7 +165,7 @@ pub const Endpoint = enum {
             }
         }
 
-        const result = try std.fmt.allocPrint(gpa, comptime endpoint.template(), arguments);
+        const result = try gpa.print(comptime endpoint.template(), arguments);
 
         assert(result.len != 0);
         assert(result[0] == '/');

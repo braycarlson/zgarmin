@@ -17,5 +17,5 @@ jobs:
             - uses: actions/checkout@v7
             - uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29
               with:
-                  version: 0.16.0
+                  version: 0.17.0
             - run: zig build ci --summary all

@@ -79,7 +79,7 @@ pub fn parse(
         else
             line;
 
-        const eq = std.mem.indexOfScalar(u8, stripped, '=') orelse continue;
+        const eq = std.mem.findScalar(u8, stripped, '=') orelse continue;
         const key = std.mem.trim(u8, stripped[0..eq], " \t");
 
         if (key.len == 0) continue;

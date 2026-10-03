@@ -96,7 +96,7 @@ pub fn save(
 
     defer gpa.free(json);
 
-    const path_partial = std.fmt.allocPrint(gpa, "{s}{s}", .{ path, suffix_partial }) catch {
+    const path_partial = gpa.print("{s}{s}", .{ path, suffix_partial }) catch {
         return TokenError.OutOfMemory;
     };
 

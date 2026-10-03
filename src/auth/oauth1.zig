@@ -171,7 +171,7 @@ pub fn nonce_hex(io: std.Io, out: *[nonce_len]u8) void {
 pub fn timestamp_seconds(io: std.Io, out: *[timestamp_len_max]u8) ![]const u8 {
     const seconds = std.Io.Clock.real.now(io).toSeconds();
 
-    return std.fmt.bufPrint(out, "{d}", .{seconds});
+    return std.mem.print(out, "{d}", .{seconds});
 }
 
 pub fn authorization_header(
@@ -387,7 +387,7 @@ fn parse_oauth1(gpa: Allocator, body: []const u8) !OAuth1Token {
     var pairs = std.mem.splitScalar(u8, body, '&');
 
     while (pairs.next()) |pair| {
-        const eq = std.mem.indexOfScalar(u8, pair, '=') orelse continue;
+        const eq = std.mem.findScalar(u8, pair, '=') orelse continue;
         const key = pair[0..eq];
         const value = pair[eq + 1 ..];
 
@@ -619,8 +619,8 @@ test "authorization header embeds oracle signature" {
     const signature_param = "oauth_signature=\"npjfRCOcKNSbw7%2BG%2BY3OSQBKfXU%3D\"";
 
     try std.testing.expect(std.mem.startsWith(u8, header, "OAuth "));
-    try std.testing.expect(std.mem.indexOf(u8, header, signature_param) != null);
-    try std.testing.expect(std.mem.indexOf(u8, header, "oauth_token=") == null);
+    try std.testing.expect(std.mem.find(u8, header, signature_param) != null);
+    try std.testing.expect(std.mem.find(u8, header, "oauth_token=") == null);
 }
 
 test "query decode handles escapes and malformed input" {

@@ -327,10 +327,10 @@ test "sso urls carry the parameters garmin requires" {
     };
 
     for (required) |parameter| {
-        try std.testing.expect(std.mem.indexOf(u8, signin_url, parameter) != null);
+        try std.testing.expect(std.mem.find(u8, signin_url, parameter) != null);
     }
 
     try std.testing.expect(std.mem.startsWith(u8, signin_url, service_root));
     try std.testing.expect(std.mem.startsWith(u8, widget_url, widget_root));
-    try std.testing.expect(std.mem.indexOf(u8, verify_url, "loginEnterMfaCode") != null);
+    try std.testing.expect(std.mem.find(u8, verify_url, "loginEnterMfaCode") != null);
 }

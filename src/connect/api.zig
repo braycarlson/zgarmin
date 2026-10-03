@@ -24,7 +24,7 @@ pub const activities = struct {
         assert(limit <= page_max);
 
         var buffer: [64]u8 = undefined;
-        const query = try std.fmt.bufPrint(&buffer, "start={d}&limit={d}", .{ start, limit });
+        const query = try std.mem.print(&buffer, "start={d}&limit={d}", .{ start, limit });
 
         return connect.get(Endpoint.activities_search.path(), query);
     }
@@ -204,7 +204,7 @@ pub const body = struct {
         assert(start_date.len != 0);
         assert(end_date.len != 0);
 
-        return std.fmt.bufPrint(buffer, "startDate={s}&endDate={s}", .{ start_date, end_date });
+        return std.mem.print(buffer, "startDate={s}&endDate={s}", .{ start_date, end_date });
     }
 };
 
@@ -232,7 +232,7 @@ pub const gear = struct {
 
         var query_buffer: [64]u8 = undefined;
 
-        const query = try std.fmt.bufPrint(
+        const query = try std.mem.print(
             &query_buffer,
             "userProfilePk={s}",
             .{user_profile_primary_key},
@@ -253,7 +253,7 @@ pub const gear = struct {
         assert(limit <= activities_limit_max);
 
         var query_buffer: [64]u8 = undefined;
-        const query = try std.fmt.bufPrint(&query_buffer, "start=0&limit={d}", .{limit});
+        const query = try std.mem.print(&query_buffer, "start=0&limit={d}", .{limit});
 
         return connect.get_endpoint(.gear_activities, .{gear_uuid}, query);
     }
@@ -501,7 +501,7 @@ pub const stats = struct {
         assert(date.len != 0);
 
         var query_buffer: [64]u8 = undefined;
-        const query = try std.fmt.bufPrint(&query_buffer, "fromDate={s}&metricId=60", .{date});
+        const query = try std.mem.print(&query_buffer, "fromDate={s}&metricId=60", .{date});
 
         return connect.get_endpoint(.resting_heart_rate, .{display_name}, query);
     }
@@ -515,7 +515,7 @@ pub const stats = struct {
     fn format_weeks(weeks: u32, buffer: *[weeks_digits_max]u8) []const u8 {
         assert(weeks != 0);
 
-        return std.fmt.bufPrint(buffer, "{d}", .{weeks}) catch |err| switch (err) {
+        return std.mem.print(buffer, "{d}", .{weeks}) catch |err| switch (err) {
             error.NoSpaceLeft => @panic("weeks_digits_max too small for a u32"),
         };
     }
@@ -534,7 +534,7 @@ pub const wellness = struct {
         assert(date.len != 0);
 
         var query_buffer: [96]u8 = undefined;
-        const query = try std.fmt.bufPrint(&query_buffer, "calendarDate={s}", .{date});
+        const query = try std.mem.print(&query_buffer, "calendarDate={s}", .{date});
 
         return connect.get_endpoint(.daily_summary, .{display_name}, query);
     }
@@ -544,7 +544,7 @@ pub const wellness = struct {
         assert(date.len != 0);
 
         var query_buffer: [96]u8 = undefined;
-        const query = try std.fmt.bufPrint(&query_buffer, "date={s}", .{date});
+        const query = try std.mem.print(&query_buffer, "date={s}", .{date});
 
         return connect.get_endpoint(.steps, .{display_name}, query);
     }
@@ -558,7 +558,7 @@ pub const wellness = struct {
         assert(date.len != 0);
 
         var query_buffer: [96]u8 = undefined;
-        const query = try std.fmt.bufPrint(&query_buffer, "date={s}", .{date});
+        const query = try std.mem.print(&query_buffer, "date={s}", .{date});
 
         return connect.get_endpoint(.heart_rate, .{display_name}, query);
     }
@@ -585,7 +585,7 @@ pub const wellness = struct {
 
         var query_buffer: [96]u8 = undefined;
 
-        const query = try std.fmt.bufPrint(
+        const query = try std.mem.print(
             &query_buffer,
             "date={s}&nonSleepBufferMinutes={d}",
             .{ date, buffer_minutes },

@@ -175,10 +175,10 @@ fn build_url(
     query: ?[]const u8,
 ) ![]u8 {
     const value = query orelse {
-        return std.fmt.allocPrint(gpa, "{s}{s}", .{ base, path });
+        return gpa.print("{s}{s}", .{ base, path });
     };
 
-    return std.fmt.allocPrint(gpa, "{s}{s}?{s}", .{ base, path, value });
+    return gpa.print("{s}{s}?{s}", .{ base, path, value });
 }
 
 pub fn refresh_token(connect: *Connect) !void {
